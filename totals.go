@@ -9,7 +9,11 @@ func (doc *Document) TotalWithoutTaxAndWithoutDocumentDiscount() decimal.Decimal
 	total := decimal.NewFromInt(0)
 
 	for _, item := range doc.Items {
-		total = total.Add(item.TotalWithoutTaxAndWithDiscount())
+		decimalAmount, err := decimal.NewFromString(item.PayedPriceExclVAT)
+		if err != nil {
+			panic(err)
+		}
+		total = total.Add(decimalAmount)
 	}
 
 	return total

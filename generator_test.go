@@ -82,10 +82,10 @@ func TestNew(t *testing.T) {
 
 	for i := 0; i < 10; i++ {
 		doc.AppendItem(&Item{
-			Name:        "Cupcake ipsum dolor sit amet bonbon, coucou bonbon lala jojo, mama titi toto",
-			Description: "Cupcake ipsum dolor sit amet bonbon, Cupcake ipsum dolor sit amet bonbon, Cupcake ipsum dolor sit amet bonbon",
-			UnitCost:    "99876.89",
-			Quantity:    "2",
+			Name:         "Cupcake ipsum dolor sit amet bonbon, coucou bonbon lala jojo, mama titi toto",
+			Description:  "Cupcake ipsum dolor sit amet bonbon, Cupcake ipsum dolor sit amet bonbon, Cupcake ipsum dolor sit amet bonbon",
+			PriceExclVAT: "99876.89",
+			PriceInclVAT: "2",
 			Tax: &Tax{
 				Percent: "20",
 			},
@@ -93,9 +93,9 @@ func TestNew(t *testing.T) {
 	}
 
 	doc.AppendItem(&Item{
-		Name:     "Test",
-		UnitCost: "99876.89",
-		Quantity: "2",
+		Name:         "Test",
+		PriceExclVAT: "99876.89",
+		PriceInclVAT: "2",
 		Tax: &Tax{
 			Amount: "89",
 		},
@@ -105,18 +105,18 @@ func TestNew(t *testing.T) {
 	})
 
 	doc.AppendItem(&Item{
-		Name:     "Test",
-		UnitCost: "3576.89",
-		Quantity: "2",
+		Name:         "Test",
+		PriceExclVAT: "3576.89",
+		PriceInclVAT: "2",
 		Discount: &Discount{
 			Percent: "50",
 		},
 	})
 
 	doc.AppendItem(&Item{
-		Name:     "Test",
-		UnitCost: "889.89",
-		Quantity: "2",
+		Name:         "Test",
+		PriceExclVAT: "889.89",
+		PriceInclVAT: "2",
 		Discount: &Discount{
 			Amount: "234.67",
 		},

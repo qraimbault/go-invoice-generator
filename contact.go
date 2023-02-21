@@ -13,6 +13,7 @@ type Contact struct {
 	Name    string   `json:"name,omitempty" validate:"required,min=1,max=256"`
 	Logo    []byte   `json:"logo,omitempty"` // Logo byte array
 	Address *Address `json:"address,omitempty"`
+	Country string   `json:"country,omitempty"`
 
 	// AddtionnalInfo to append after contact informations. You can use basic html here (bold, italic tags).
 	AddtionnalInfo []string `json:"additional_info,omitempty"`
@@ -47,8 +48,8 @@ func (c *Contact) appendContactTODoc(
 		if imageInfo != nil {
 			var imageOpt fpdf.ImageOptions
 			imageOpt.ImageType = format
-			doc.pdf.ImageOptions(fileName, doc.pdf.GetX(), y, 0, 30, false, imageOpt, 0, "")
-			doc.pdf.SetY(y + 30)
+			doc.pdf.ImageOptions(fileName, doc.pdf.GetX(), y, 0, 37, false, imageOpt, 0, "")
+			doc.pdf.SetY(y + 35)
 		}
 	}
 
@@ -92,6 +93,11 @@ func (c *Contact) appendContactTODoc(
 		doc.pdf.SetFont(doc.Options.Font, "", 10)
 		doc.pdf.SetXY(x, doc.pdf.GetY()+10)
 		doc.pdf.MultiCell(70, 5, doc.encodeString(c.Address.ToString()), "0", "L", false)
+	} else if c.Country != "" {
+		var addrRectHeight float64 = 10
+		doc.pdf.Rect(x, doc.pdf.GetY()+9, 70, addrRectHeight, "F")
+		doc.pdf.SetXY(x, doc.pdf.GetY()+10)
+		doc.pdf.Cell(40, 8, doc.encodeString("Country: "+c.Country))
 	}
 
 	// Addtionnal info

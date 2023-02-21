@@ -162,7 +162,7 @@ func (doc *Document) drawsTableTitles() {
 	// Name
 	doc.pdf.SetX(ItemColNameOffset)
 	doc.pdf.CellFormat(
-		ItemColUnitPriceOffset-ItemColNameOffset,
+		ItemColHTPriceOffset-ItemColNameOffset,
 		6,
 		doc.encodeString(doc.Options.TextItemsNameTitle),
 		"0",
@@ -174,9 +174,9 @@ func (doc *Document) drawsTableTitles() {
 	)
 
 	// Unit price
-	doc.pdf.SetX(ItemColUnitPriceOffset)
+	doc.pdf.SetX(ItemColHTPriceOffset)
 	doc.pdf.CellFormat(
-		ItemColQuantityOffset-ItemColUnitPriceOffset,
+		ItemColPriceInclVATOffset-ItemColHTPriceOffset,
 		6,
 		doc.encodeString(doc.Options.TextItemsUnitCostTitle),
 		"0",
@@ -187,26 +187,12 @@ func (doc *Document) drawsTableTitles() {
 		"",
 	)
 
-	// Quantity
-	doc.pdf.SetX(ItemColQuantityOffset)
+	// PriceInclVAT
+	doc.pdf.SetX(ItemColPriceInclVATOffset)
 	doc.pdf.CellFormat(
-		ItemColTaxOffset-ItemColQuantityOffset,
+		ItemColTaxOffset-ItemColPriceInclVATOffset,
 		6,
 		doc.encodeString(doc.Options.TextItemsQuantityTitle),
-		"0",
-		0,
-		"",
-		false,
-		0,
-		"",
-	)
-
-	// Total HT
-	doc.pdf.SetX(ItemColTotalHTOffset)
-	doc.pdf.CellFormat(
-		ItemColTaxOffset-ItemColTotalHTOffset,
-		6,
-		doc.encodeString(doc.Options.TextItemsTotalHTTitle),
 		"0",
 		0,
 		"",

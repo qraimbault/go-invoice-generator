@@ -8,12 +8,14 @@ import (
 
 // Item represent a 'product' or a 'service'
 type Item struct {
-	Name        string    `json:"name,omitempty" validate:"required"`
-	Description string    `json:"description,omitempty"`
-	UnitCost    string    `json:"unit_cost,omitempty"`
-	Quantity    string    `json:"quantity,omitempty"`
-	Tax         *Tax      `json:"tax,omitempty"`
-	Discount    *Discount `json:"discount,omitempty"`
+	Name              string    `json:"name,omitempty" validate:"required"`
+	Description       string    `json:"description,omitempty"`
+	PriceExclVAT      string    `json:"unit_cost,omitempty"`
+	PriceInclVAT      string    `json:"quantity,omitempty"`
+	PayedPriceInclVAT string    `json:"payed_price_incl_vat,omitempty"`
+	PayedPriceExclVAT string    `json:"payed_price_excl_vat,omitempty"`
+	Tax               *Tax      `json:"tax,omitempty"`
+	Discount          *Discount `json:"discount,omitempty"`
 
 	_unitCost decimal.Decimal
 	_quantity decimal.Decimal
@@ -22,14 +24,14 @@ type Item struct {
 // Prepare convert strings to decimal
 func (i *Item) Prepare() error {
 	// Unit cost
-	unitCost, err := decimal.NewFromString(i.UnitCost)
+	unitCost, err := decimal.NewFromString(i.PriceExclVAT)
 	if err != nil {
 		return err
 	}
 	i._unitCost = unitCost
 
-	// Quantity
-	quantity, err := decimal.NewFromString(i.Quantity)
+	// PriceInclVAT
+	quantity, err := decimal.NewFromString(i.PriceInclVAT)
 	if err != nil {
 		return err
 	}
@@ -54,8 +56,8 @@ func (i *Item) Prepare() error {
 
 // TotalWithoutTaxAndWithoutDiscount returns the total without tax and without discount
 func (i *Item) TotalWithoutTaxAndWithoutDiscount() decimal.Decimal {
-	quantity, _ := decimal.NewFromString(i.Quantity)
-	price, _ := decimal.NewFromString(i.UnitCost)
+	quantity, _ := decimal.NewFromString(i.PriceInclVAT)
+	price, _ := decimal.NewFromString(i.PriceExclVAT)
 	total := price.Mul(quantity)
 
 	return total
@@ -115,7 +117,7 @@ func (i *Item) appendColTo(options *Options, doc *Document) {
 	// Name
 	doc.pdf.SetX(ItemColNameOffset)
 	doc.pdf.MultiCell(
-		ItemColUnitPriceOffset-ItemColNameOffset,
+		ItemColHTPriceOffset-ItemColNameOffset,
 		3,
 		doc.encodeString(i.Name),
 		"",
@@ -136,7 +138,7 @@ func (i *Item) appendColTo(options *Options, doc *Document) {
 		)
 
 		doc.pdf.MultiCell(
-			ItemColUnitPriceOffset-ItemColNameOffset,
+			ItemColHTPriceOffset-ItemColNameOffset,
 			3,
 			doc.encodeString(i.Description),
 			"",
@@ -156,11 +158,11 @@ func (i *Item) appendColTo(options *Options, doc *Document) {
 	// Compute line height
 	colHeight := doc.pdf.GetY() - baseY
 
-	// Unit price
+	// PriceExclVAT
 	doc.pdf.SetY(baseY)
-	doc.pdf.SetX(ItemColUnitPriceOffset)
+	doc.pdf.SetX(ItemColHTPriceOffset)
 	doc.pdf.CellFormat(
-		ItemColQuantityOffset-ItemColUnitPriceOffset,
+		ItemColPriceInclVATOffset-ItemColHTPriceOffset,
 		colHeight,
 		doc.encodeString(doc.ac.FormatMoneyDecimal(i._unitCost)),
 		"0",
@@ -171,26 +173,12 @@ func (i *Item) appendColTo(options *Options, doc *Document) {
 		"",
 	)
 
-	// Quantity
-	doc.pdf.SetX(ItemColQuantityOffset)
+	// PriceInclVAT
+	doc.pdf.SetX(ItemColPriceInclVATOffset)
 	doc.pdf.CellFormat(
-		ItemColTaxOffset-ItemColQuantityOffset,
+		ItemColTaxOffset-ItemColPriceInclVATOffset,
 		colHeight,
-		doc.encodeString(i._quantity.String()),
-		"0",
-		0,
-		"",
-		false,
-		0,
-		"",
-	)
-
-	// Total HT
-	doc.pdf.SetX(ItemColTotalHTOffset)
-	doc.pdf.CellFormat(
-		ItemColTaxOffset-ItemColTotalHTOffset,
-		colHeight,
-		doc.encodeString(doc.ac.FormatMoneyDecimal(i.TotalWithoutTaxAndWithoutDiscount())),
+		doc.encodeString(doc.ac.FormatMoneyDecimal(i._quantity)),
 		"0",
 		0,
 		"",
@@ -215,56 +203,22 @@ func (i *Item) appendColTo(options *Options, doc *Document) {
 		)
 	} else {
 		// If discount
-		discountType, discountAmount := i.Discount.getDiscount()
-		var discountTitle string
 		var discountDesc string
-
-		dCost := i.TotalWithoutTaxAndWithoutDiscount()
-		if discountType == DiscountTypePercent {
-			discountTitle = fmt.Sprintf("%s %s", discountAmount, doc.encodeString("%"))
-
-			// get amount from percent
-			dAmount := dCost.Mul(discountAmount.Div(decimal.NewFromFloat(100)))
-			discountDesc = fmt.Sprintf("-%s", doc.ac.FormatMoneyDecimal(dAmount))
-		} else {
-			discountTitle = fmt.Sprintf("%s %s", discountAmount, doc.encodeString("€"))
-
-			// get percent from amount
-			dPerc := discountAmount.Mul(decimal.NewFromFloat(100))
-			dPerc = dPerc.Div(dCost)
-			discountDesc = fmt.Sprintf("-%s %%", dPerc.StringFixed(2))
+		decimalAmount, err := decimal.NewFromString(i.Discount.Amount)
+		if err != nil {
+			panic(err)
 		}
+		discountDesc = fmt.Sprintf("- %s", doc.ac.FormatMoneyDecimal(decimalAmount))
 
 		// discount title
 		// lastY := doc.pdf.GetY()
 		doc.pdf.CellFormat(
 			ItemColTotalTTCOffset-ItemColDiscountOffset,
-			colHeight/2,
-			doc.encodeString(discountTitle),
-			"0",
-			0,
-			"LB",
-			false,
-			0,
-			"",
-		)
-
-		// discount desc
-		doc.pdf.SetXY(ItemColDiscountOffset, baseY+(colHeight/2))
-		doc.pdf.SetFont(doc.Options.Font, "", SmallTextFontSize)
-		doc.pdf.SetTextColor(
-			doc.Options.GreyTextColor[0],
-			doc.Options.GreyTextColor[1],
-			doc.Options.GreyTextColor[2],
-		)
-
-		doc.pdf.CellFormat(
-			ItemColTotalTTCOffset-ItemColDiscountOffset,
-			colHeight/2,
+			colHeight,
 			doc.encodeString(discountDesc),
 			"0",
 			0,
-			"LT",
+			"",
 			false,
 			0,
 			"",
@@ -296,25 +250,12 @@ func (i *Item) appendColTo(options *Options, doc *Document) {
 			"",
 		)
 	} else {
-		// If tax
-		taxType, taxAmount := i.Tax.getTax()
-		var taxTitle string
-		var taxDesc string
-
-		if taxType == TaxTypePercent {
-			taxTitle = fmt.Sprintf("%s %s", taxAmount, "%")
-			// get amount from percent
-			dCost := i.TotalWithoutTaxAndWithDiscount()
-			dAmount := dCost.Mul(taxAmount.Div(decimal.NewFromFloat(100)))
-			taxDesc = doc.ac.FormatMoneyDecimal(dAmount)
-		} else {
-			taxTitle = fmt.Sprintf("%s %s", doc.ac.Symbol, taxAmount)
-			dCost := i.TotalWithoutTaxAndWithDiscount()
-			dPerc := taxAmount.Mul(decimal.NewFromFloat(100))
-			dPerc = dPerc.Div(dCost)
-			// get percent from amount
-			taxDesc = fmt.Sprintf("%s %%", dPerc.StringFixed(2))
+		decimalAmount, err := decimal.NewFromString(i.Tax.Amount)
+		if err != nil {
+			panic(err)
 		}
+		taxTitle := fmt.Sprintf("%s", doc.ac.FormatMoneyDecimal(decimalAmount))
+		taxDesc := fmt.Sprintf("%s %s", i.Tax.Percent, doc.encodeString("%"))
 
 		// tax title
 		// lastY := doc.pdf.GetY()
@@ -361,12 +302,16 @@ func (i *Item) appendColTo(options *Options, doc *Document) {
 		doc.pdf.SetY(baseY)
 	}
 
+	decimalAmount, err := decimal.NewFromString(i.PayedPriceInclVAT)
+	if err != nil {
+		panic(err)
+	}
 	// TOTAL TTC
 	doc.pdf.SetX(ItemColTotalTTCOffset)
 	doc.pdf.CellFormat(
 		190-ItemColTotalTTCOffset,
 		colHeight,
-		doc.encodeString(doc.ac.FormatMoneyDecimal(i.TotalWithTaxAndDiscount())),
+		doc.encodeString(doc.ac.FormatMoneyDecimal(decimalAmount)),
 		"0",
 		0,
 		"",
