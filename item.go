@@ -189,7 +189,7 @@ func (i *Item) appendColTo(options *Options, doc *Document) {
 
 	// Discount
 	doc.pdf.SetX(ItemColDiscountOffset)
-	if i.Discount == nil {
+	if i.Discount == nil || i.Discount.Amount == "0.00" {
 		doc.pdf.CellFormat(
 			ItemColTotalTTCOffset-ItemColDiscountOffset,
 			colHeight,
