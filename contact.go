@@ -97,7 +97,7 @@ func (c *Contact) appendContactTODoc(
 		var addrRectHeight float64 = 10
 		doc.pdf.Rect(x, doc.pdf.GetY()+9, 70, addrRectHeight, "F")
 		doc.pdf.SetXY(x, doc.pdf.GetY()+10)
-		doc.pdf.Cell(40, 8, doc.encodeString("Country: "+c.Country))
+		doc.pdf.Cell(40, 8, doc.encodeString(c.Country))
 	}
 
 	// Addtionnal info
