@@ -235,7 +235,7 @@ func (i *Item) appendColTo(options *Options, doc *Document) {
 		doc.pdf.CellFormat(
 			ItemColTotalTTCOffset-ItemColDiscountOffset,
 			colHeight/2,
-			doc.encodeString(i.Discount.Percent),
+			doc.encodeString(fmt.Sprintf("%s%", i.Discount.Percent)),
 			"0",
 			0,
 			"LT",
