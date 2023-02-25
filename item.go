@@ -223,6 +223,26 @@ func (i *Item) appendColTo(options *Options, doc *Document) {
 			0,
 			"",
 		)
+		// discount desc
+		doc.pdf.SetXY(ItemColDiscountOffset, baseY+(colHeight/2))
+		doc.pdf.SetFont(doc.Options.Font, "", SmallTextFontSize)
+		doc.pdf.SetTextColor(
+			doc.Options.GreyTextColor[0],
+			doc.Options.GreyTextColor[1],
+			doc.Options.GreyTextColor[2],
+		)
+
+		doc.pdf.CellFormat(
+			ItemColTotalTTCOffset-ItemColDiscountOffset,
+			colHeight/2,
+			doc.encodeString(i.Discount.Percent),
+			"0",
+			0,
+			"LT",
+			false,
+			0,
+			"",
+		)
 
 		// reset font and y
 		doc.pdf.SetFont(doc.Options.Font, "", BaseTextFontSize)
