@@ -176,9 +176,23 @@ func (i *Item) appendColTo(options *Options, doc *Document) {
 	// PriceInclVAT
 	doc.pdf.SetX(ItemColPriceInclVATOffset)
 	doc.pdf.CellFormat(
-		ItemColTaxOffset-ItemColPriceInclVATOffset,
+		ItemColQtyOffset-ItemColPriceInclVATOffset,
 		colHeight,
 		doc.encodeString(doc.ac.FormatMoneyDecimal(i._quantity)),
+		"0",
+		0,
+		"",
+		false,
+		0,
+		"",
+	)
+
+	// Qty
+	doc.pdf.SetX(ItemColQtyOffset)
+	doc.pdf.CellFormat(
+		ItemColTaxOffset-ItemColQtyOffset,
+		colHeight,
+		doc.encodeString("1"),
 		"0",
 		0,
 		"",

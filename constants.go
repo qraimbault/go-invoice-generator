@@ -34,6 +34,9 @@ const (
 	// ItemColPriceInclVATOffset ...
 	ItemColPriceInclVATOffset float64 = 113
 
+	// ItemColQtyOffset ...
+	ItemColQtyOffset float64 = 127
+
 	// ItemColDiscountOffset ...
 	ItemColDiscountOffset float64 = 140
 

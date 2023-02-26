@@ -190,9 +190,23 @@ func (doc *Document) drawsTableTitles() {
 	// PriceInclVAT
 	doc.pdf.SetX(ItemColPriceInclVATOffset)
 	doc.pdf.CellFormat(
-		ItemColTaxOffset-ItemColPriceInclVATOffset,
+		ItemColQtyOffset-ItemColPriceInclVATOffset,
 		6,
 		doc.encodeString(doc.Options.TextItemsQuantityTitle),
+		"0",
+		0,
+		"",
+		false,
+		0,
+		"",
+	)
+
+	// Qty
+	doc.pdf.SetX(ItemColQtyOffset)
+	doc.pdf.CellFormat(
+		ItemColTaxOffset-ItemColQtyOffset,
+		6,
+		doc.encodeString("Qty"),
 		"0",
 		0,
 		"",
