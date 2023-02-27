@@ -79,7 +79,25 @@ func (c *Contact) appendContactTODoc(
 	doc.pdf.Cell(40, 8, doc.encodeString(c.Name))
 	doc.pdf.SetFont(doc.Options.Font, "", 10)
 
-	if c.Country != "" {
+	if c.Address != nil {
+		// Address rect
+		var addrRectHeight float64 = 17
+
+		if len(c.Address.Address2) > 0 {
+			addrRectHeight = addrRectHeight + 5
+		}
+
+		if len(c.Address.Country) == 0 {
+			addrRectHeight = addrRectHeight - 5
+		}
+
+		doc.pdf.Rect(x, doc.pdf.GetY()+9, 70, addrRectHeight, "F")
+
+		// Set address
+		doc.pdf.SetFont(doc.Options.Font, "", 10)
+		doc.pdf.SetXY(x, doc.pdf.GetY()+10)
+		doc.pdf.MultiCell(70, 5, doc.encodeString(c.Address.ToString()), "0", "L", false)
+	} else if c.Country != "" {
 		var addrRectHeight float64 = 10
 		content := ""
 		doc.pdf.Rect(x, doc.pdf.GetY()+9, 70, addrRectHeight, "F")
@@ -90,7 +108,7 @@ func (c *Contact) appendContactTODoc(
 		if c.ZipCode != "" && c.City != "" {
 			content = fmt.Sprintf("%s%s %s\n", content, c.ZipCode, c.City)
 		}
-		content = fmt.Sprintf("%s%s\n", content, c.Country)
+		content = fmt.Sprintf("%s%s", content, c.Country)
 		doc.pdf.Cell(40, 8, doc.encodeString(content))
 	}
 
