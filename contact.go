@@ -100,15 +100,17 @@ func (c *Contact) appendContactTODoc(
 	} else if c.Country != "" {
 		var addrRectHeight float64 = 10
 		content := ""
-		doc.pdf.Rect(x, doc.pdf.GetY()+9, 70, addrRectHeight, "F")
-		doc.pdf.SetXY(x, doc.pdf.GetY()+10)
 		if c.AddressLine != "" {
 			content = fmt.Sprintf("%s\n", c.AddressLine)
+			addrRectHeight = addrRectHeight + 5
 		}
 		if c.ZipCode != "" && c.City != "" {
 			content = fmt.Sprintf("%s%s %s\n", content, c.ZipCode, c.City)
+			addrRectHeight = addrRectHeight + 5
 		}
 		content = fmt.Sprintf("%s%s", content, c.Country)
+		doc.pdf.Rect(x, doc.pdf.GetY()+9, 70, addrRectHeight, "F")
+		doc.pdf.SetXY(x, doc.pdf.GetY()+10)
 		doc.pdf.MultiCell(70, 5, doc.encodeString(content), "0", "L", false)
 	}
 
