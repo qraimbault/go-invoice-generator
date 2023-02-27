@@ -129,7 +129,7 @@ func (doc *Document) appendMetas() {
 	}
 
 	// Append date
-	date := time.Now().Format("02/01/2006")
+	date := time.Now().Format("01/02/2006")
 	if len(doc.Date) > 0 {
 		date = doc.Date
 	}

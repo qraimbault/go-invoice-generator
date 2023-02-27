@@ -3,6 +3,7 @@ package generator
 import (
 	"bytes"
 	b64 "encoding/base64"
+	"fmt"
 	"image"
 
 	"github.com/go-pdf/fpdf"
@@ -10,10 +11,13 @@ import (
 
 // Contact contact a company informations
 type Contact struct {
-	Name    string   `json:"name,omitempty" validate:"required,min=1,max=256"`
-	Logo    []byte   `json:"logo,omitempty"` // Logo byte array
-	Address *Address `json:"address,omitempty"`
-	Country string   `json:"country,omitempty"`
+	Name        string   `json:"name,omitempty" validate:"required,min=1,max=256"`
+	Logo        []byte   `json:"logo,omitempty"` // Logo byte array
+	Address     *Address `json:"address,omitempty"`
+	Country     string   `json:"country,omitempty"`
+	AddressLine string   `json:"addressLine,omitempty"`
+	ZipCode     string   `json:"zipCode,omitempty"`
+	City        string   `json:"city,omitempty"`
 
 	// AddtionnalInfo to append after contact informations. You can use basic html here (bold, italic tags).
 	AddtionnalInfo []string `json:"additional_info,omitempty"`
@@ -75,29 +79,19 @@ func (c *Contact) appendContactTODoc(
 	doc.pdf.Cell(40, 8, doc.encodeString(c.Name))
 	doc.pdf.SetFont(doc.Options.Font, "", 10)
 
-	if c.Address != nil {
-		// Address rect
-		var addrRectHeight float64 = 17
-
-		if len(c.Address.Address2) > 0 {
-			addrRectHeight = addrRectHeight + 5
-		}
-
-		if len(c.Address.Country) == 0 {
-			addrRectHeight = addrRectHeight - 5
-		}
-
-		doc.pdf.Rect(x, doc.pdf.GetY()+9, 70, addrRectHeight, "F")
-
-		// Set address
-		doc.pdf.SetFont(doc.Options.Font, "", 10)
-		doc.pdf.SetXY(x, doc.pdf.GetY()+10)
-		doc.pdf.MultiCell(70, 5, doc.encodeString(c.Address.ToString()), "0", "L", false)
-	} else if c.Country != "" {
+	if c.Country != "" {
 		var addrRectHeight float64 = 10
+		content := ""
 		doc.pdf.Rect(x, doc.pdf.GetY()+9, 70, addrRectHeight, "F")
 		doc.pdf.SetXY(x, doc.pdf.GetY()+10)
-		doc.pdf.Cell(40, 8, doc.encodeString(c.Country))
+		if c.AddressLine != "" {
+			content = fmt.Sprintf("%s\n", c.AddressLine)
+		}
+		if c.ZipCode != "" && c.City != "" {
+			content = fmt.Sprintf("%s%s %s\n", content, c.ZipCode, c.City)
+		}
+		content = fmt.Sprintf("%s%s\n", content, c.Country)
+		doc.pdf.Cell(40, 8, doc.encodeString(content))
 	}
 
 	// Addtionnal info
