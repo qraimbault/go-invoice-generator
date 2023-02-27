@@ -109,7 +109,7 @@ func (c *Contact) appendContactTODoc(
 			content = fmt.Sprintf("%s%s %s\n", content, c.ZipCode, c.City)
 		}
 		content = fmt.Sprintf("%s%s", content, c.Country)
-		doc.pdf.MultiCell(40, 8, doc.encodeString(content), "0", "L", false)
+		doc.pdf.MultiCell(70, 5, doc.encodeString(content), "0", "L", false)
 	}
 
 	// Addtionnal info
